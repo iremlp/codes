@@ -1,11 +1,8 @@
 from microbit import *
 import random
+import radio
 
-p = 0
-g = 0
-
-# les images illustrant les issues d'un tirage
-gagne = Image("99999:"
+# on créé les images illustrant les issues d'un tiragegagne = Image("99999:"
               "90009:"
               "90909:"
               "90009:"
@@ -16,14 +13,13 @@ perd = Image("99999:"
              "90009:"
              "90009:"
              "99999:")
-
+# on créé les images composant l'animation
 plus0 = Image("00900:"
               "00900:"
               "99999:"
               "00900:"
               "00900:")
 
-# les images composants l'animation
 plus1 = Image("09000:"
               "09000:"
               "99999:"
@@ -48,12 +44,19 @@ plus4 = Image("00009:"
               "00009:"
               "00009:")
               
-# la liste des images, permettant de donner leur ordre d'apparition
+# on allume la radio
+radio.on()
+
+# on initialise les variables
+p = 0
+g = 0
+
+# on crée la liste des images, permettant de donner leur ordre d'apparition
 plus = [plus0, plus1, plus2, plus4, plus3, plus0]
 
 temps = [100, 50, 50, 25]
 
-# l'animation avant les tirages
+# on définie l'animation avant les tirages
 def anim():
     for t in temps:
         display.show(plus, delay=t)
@@ -66,10 +69,12 @@ while True:
         anim()
         if random.randint(1, 100) < 55:
             display.show(gagne)
-            g = g + 1
+            g += 1
+            radio.send('g')
         else:
             display.show(perd)
-            p = p + 1
+            p += 1
+            radio.send('p')
     # si on appuie sur le bouton "A",
     # l'appareil fait 25 tirages (1 LED allumée = gagné)
     if button_a.was_pressed():
@@ -78,17 +83,16 @@ while True:
             for j in range(5):
                 if random.randint(1, 100) < 55:
                     display.set_pixel(i, j, 9)
-                    g = g + 1
+                    g += 1
+                    radio.send('g')
+                    sleep(10)
                 else:
                     display.set_pixel(i, j, 0)
-                    p = p + 1
+                    p += 1
+                    radio.send('p')
+                    sleep(10)
     
     # si l'on appuie sur le bouton "B",
     # l'appareil affiche les résultats des tirages (G : gagné, P : perdu)
     if button_b.was_pressed():
         display.scroll("P: "+str(p)+" / G: "+str(g))
-
-    # le 'tuple' de valeur (p,g) est envoyé vers l'ordinateur pour affichage
-    # dans le graphique
-    print((p, g))
-    sleep(50)
